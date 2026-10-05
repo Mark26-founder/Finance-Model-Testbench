@@ -1,0 +1,87 @@
+{
+  "version": "1.0",
+  "description": "Ground-truth manifest for synthetic financial model fixtures (C2)",
+  "fixtures": [
+    {
+      "fixture_id": "FIX_VALID_001",
+      "fixture_type": "valid",
+      "relative_path": "examples/fixtures/valid/valid_three_statement.xlsx",
+      "description": "Synthetic 3-statement model (IS, BS, CF) with coherent balance and roll-forward formulas.",
+      "expected_validity": true,
+      "defect": null,
+      "scenario_inputs": {
+        "revenue_growth": "'Assumptions'!B2",
+        "operating_margin": "'Assumptions'!B3",
+        "tax_rate": "'Assumptions'!B4",
+        "interest_rate": "'Assumptions'!B5",
+        "capex_percent": "'Assumptions'!B6"
+      }
+    },
+    {
+      "fixture_id": "FIX_DEF_001",
+      "fixture_type": "defective",
+      "relative_path": "examples/fixtures/defective/defective_balance_sheet_imbalance.xlsx",
+      "description": "3-statement model with an artificial +50 offset added to Total Assets on Balance Sheet.",
+      "expected_validity": false,
+      "defect": {
+        "defect_id": "DEF_BS_001",
+        "category": "STATEMENT_INTEGRITY",
+        "affected_statement": "Balance Sheet",
+        "affected_cells": ["'Balance Sheet'!C5"],
+        "expected_relationship": "'Balance Sheet'!C5 == 'Balance Sheet'!C12",
+        "observed_relationship": "'Balance Sheet'!C5 == 'Balance Sheet'!C12 + 50.0",
+        "why_it_matters": "Violates the fundamental accounting identity Assets = Liabilities + Equity.",
+        "expected_future_test_behaviour": "FAIL on Balance Sheet Identity Assertion"
+      }
+    },
+    {
+      "fixture_id": "FIX_DEF_002",
+      "fixture_type": "defective",
+      "relative_path": "examples/fixtures/defective/defective_retained_earnings_rollforward.xlsx",
+      "description": "3-statement model with Retained Earnings rollforward formula subtracting an unrecorded 100.0 dividend.",
+      "expected_validity": false,
+      "defect": {
+        "defect_id": "DEF_RE_001",
+        "category": "ROLL_FORWARD",
+        "affected_statement": "Balance Sheet",
+        "affected_cells": ["'Balance Sheet'!C10"],
+        "expected_relationship": "'Balance Sheet'!C10 == 'Balance Sheet'!B10 + 'Income Statement'!C10",
+        "observed_relationship": "'Balance Sheet'!C10 == 'Balance Sheet'!B10 + 'Income Statement'!C10 - 100.0",
+        "why_it_matters": "Retained Earnings ending balance does not match prior balance plus net income minus recorded dividends.",
+        "expected_future_test_behaviour": "FAIL on Retained Earnings Roll-Forward Assertion"
+      }
+    },
+    {
+      "fixture_id": "FIX_DEF_003",
+      "fixture_type": "defective",
+      "relative_path": "examples/fixtures/defective/defective_cash_flow_linkage.xlsx",
+      "description": "3-statement model with Cash Flow Statement Depreciation hardcoded to 0 instead of linking to Income Statement.",
+      "expected_validity": false,
+      "defect": {
+        "defect_id": "DEF_LINK_001",
+        "category": "CROSS_STATEMENT_LINK",
+        "affected_statement": "Cash Flow Statement",
+        "affected_cells": ["'Cash Flow Statement'!B3"],
+        "expected_relationship": "'Cash Flow Statement'!B3 == 'Income Statement'!C5",
+        "observed_relationship": "'Cash Flow Statement'!B3 == 0.0",
+        "why_it_matters": "Non-cash depreciation add-back is omitted from Operating Cash Flow, causing cash flow and balance sheet miscalculation.",
+        "expected_future_test_behaviour": "FAIL on Depreciation Cross-Statement Link Assertion"
+      }
+    },
+    {
+      "fixture_id": "FIX_SCEN_001",
+      "fixture_type": "scenarios",
+      "relative_path": "examples/fixtures/scenarios/scenario_three_statement.xlsx",
+      "description": "3-statement model with clean assumption cells prepared for scenario input mutation.",
+      "expected_validity": true,
+      "defect": null,
+      "scenario_inputs": {
+        "revenue_growth": "'Assumptions'!B2",
+        "operating_margin": "'Assumptions'!B3",
+        "tax_rate": "'Assumptions'!B4",
+        "interest_rate": "'Assumptions'!B5",
+        "capex_percent": "'Assumptions'!B6"
+      }
+    }
+  ]
+}
